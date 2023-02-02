@@ -5,7 +5,7 @@ import WorkOutScreen from './components/TabScreens/Workout/WorkOutScreen';
 import MealsScreen from './components/TabScreens/Meals/MealsScreen';
 import SignupAndLoginModal from './components/Modals/SignupAndLogin/SignupAndLoginScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { colors } from './config/colors';
+import { colors } from './config/config';
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 const Tab = createBottomTabNavigator();

@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet } from "react-native";
-import { colors } from "../../../config/colors";
+import { colors } from "../../../config/config";
 
 const HomeScreen = function({props}){
     return (

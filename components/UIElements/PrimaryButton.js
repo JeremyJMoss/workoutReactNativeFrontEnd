@@ -25,7 +25,7 @@ const PrimaryButton = function({onPress, children, styleOptions = {}}){
             android_ripple={{borderless:true}}>
                 <Text style={
                     {
-                        fontSize: styleOptions.textSize ?? 16,
+                        fontSize: styleOptions.fontSize ?? 16,
                         fontWeight: "bold", 
                         color: styleOptions.color ?? "black"
                     }
