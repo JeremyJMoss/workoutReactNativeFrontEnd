@@ -3,4 +3,5 @@ export const colors = {
     PRIMARYBACKGROUND: "#173552",
     ACCENTTINT: "#AA1428",
     PRIMARYWHITE: "#cdcdcd",
+    SECONDARYACCENTTINT: "#EBC67A"
 }

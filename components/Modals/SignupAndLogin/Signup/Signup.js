@@ -1,4 +1,4 @@
-import {Text, View, Pressable, TextInput, StyleSheet} from "react-native";
+import {View, Pressable, StyleSheet} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { colors } from "../../../../config/config";
 

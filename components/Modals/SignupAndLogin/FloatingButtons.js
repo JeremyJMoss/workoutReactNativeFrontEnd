@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-evenly",
     },
     buttonStyle: {
-        backgroundColor: colors.PRIMARYWHITE,
+        backgroundColor: colors.SECONDARYACCENTTINT,
         color: colors.ACCENTTINT,
         fontSize: 22,
         width: 180,
