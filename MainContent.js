@@ -47,6 +47,7 @@ const MainContent = function(){
                         padding: 10,
                         height: 70,
                 },
+                tabBarHideOnKeyboard: true,
                 tabBarActiveTintColor: colors.ACCENTTINT,
                 tabBarInactiveTintColor: colors.PRIMARYWHITE,
                 tabBarLabelStyle: {color: colors.PRIMARYWHITE, paddingBottom: 10, fontSize: 11},

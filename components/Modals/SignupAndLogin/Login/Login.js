@@ -2,7 +2,7 @@ import {Text, View, Pressable, TextInput, StyleSheet} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { colors } from "../../../../config/config";
 import PrimaryButton from "../../../UIElements/PrimaryButton";
-import { useState, useEffect } from "react";
+import { useState} from "react";
 
 const Login = ({setPage}) => {
     const [usernameFocused, setUsernameFocused] = useState(false);
@@ -34,7 +34,7 @@ const Login = ({setPage}) => {
             }
         }
         catch(err){
-            console.error(err);
+            setLoginResponse({loggedIn:false, error:err.message});
         }
     }
 
