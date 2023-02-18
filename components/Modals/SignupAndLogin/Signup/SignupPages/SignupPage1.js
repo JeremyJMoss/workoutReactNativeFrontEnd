@@ -1,15 +1,14 @@
 import { useState } from "react";
 import {View, Text, TextInput, StyleSheet} from "react-native";
 import { colors } from "../../../../../config/config";
+import { useSelector, useDispatch } from "react-redux";
+import { firstNameChange, lastNameChange, emailChange } from "../../../../../config/reducers/signupReducer";
 
 const SignupPage1 = () => {
-    const [firstNameInput, setFirstNameInput] = useState("");
-    const [lastNameInput, setLastNameInput] = useState("");
-    const [emailInput, setEmailInput] = useState("");
-
-    const setTextInput = (text, callbackFunc) => {
-        callbackFunc(text);
-    }
+    const dispatch = useDispatch();
+    const firstName = useSelector((state) => state.signup.firstName);
+    const lastName = useSelector((state) => state.signup.lastName);
+    const email = useSelector((state) => state.signup.email);
 
     return (
         <View style={styles.inputs}>
@@ -19,8 +18,8 @@ const SignupPage1 = () => {
                     <TextInput
                     autoCapitalize="words"
                     style={styles.fieldTextInput}
-                    onChangeText={(text) => {setTextInput(text, setFirstNameInput)}}
-                    value={firstNameInput}/>
+                    onChangeText={(text) => {dispatch(firstNameChange({value: text}))}}
+                    value={firstName}/>
                 </View>
             </View>
             <View style={styles.field}>
@@ -29,8 +28,8 @@ const SignupPage1 = () => {
                     <TextInput
                     autoCapitalize="words"
                     style={styles.fieldTextInput}
-                    onChangeText={(text) => {setTextInput(text, setLastNameInput)}}
-                    value={lastNameInput}/>
+                    onChangeText={(text) => {dispatch(lastNameChange({value: text}))}}
+                    value={lastName}/>
                 </View>
             </View>
             <View style={styles.field}>
@@ -39,8 +38,8 @@ const SignupPage1 = () => {
                     <TextInput
                     autoCapitalize="none" 
                     style={styles.fieldTextInput}
-                    onChangeText={(text) => {setTextInput(text, setEmailInput)}}
-                    value={emailInput}/>
+                    onChangeText={(text) => {dispatch(emailChange({value: text}))}}
+                    value={email}/>
                 </View>
             </View>
         </View>
