@@ -2,41 +2,52 @@ import { useState } from "react";
 import {View, Text, TextInput, StyleSheet} from "react-native";
 import { colors } from "../../../../../config/config";
 import { useSelector, useDispatch } from "react-redux";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { firstNameChange, lastNameChange, emailChange } from "../../../../../config/reducers/signupReducer";
 
 const SignupPage1 = () => {
     const dispatch = useDispatch();
-    const firstName = useSelector((state) => state.signup.firstName);
-    const lastName = useSelector((state) => state.signup.lastName);
-    const email = useSelector((state) => state.signup.email);
+    const {firstName, lastName, email} = useSelector((state) => state.signup.signupData);
+    const [firstNameFocused, setFirstNameFocused] = useState(false);
+    const [lastNameFocused, setLastNameFocused] = useState(false);
+    const [emailFocused, setEmailFocused] = useState(false);
 
     return (
         <View style={styles.inputs}>
             <View style={styles.field}>
-                <Text style={styles.fieldLabel}>FIRST NAME</Text>
+                <Text style={{...styles.fieldLabel, ...!firstNameFocused && firstName === "" && styles.overlay}}>FIRST NAME</Text>
                 <View style={styles.fieldInput}>
+                    <Ionicons name="person-circle-outline" size={20}/>
                     <TextInput
                     autoCapitalize="words"
+                    onBlur={() => setFirstNameFocused(false)} 
+                    onFocus={() => setFirstNameFocused(true)} 
                     style={styles.fieldTextInput}
                     onChangeText={(text) => {dispatch(firstNameChange({value: text}))}}
                     value={firstName}/>
                 </View>
             </View>
             <View style={styles.field}>
-                <Text style={styles.fieldLabel}>LAST NAME</Text>
+                <Text style={{...styles.fieldLabel, ...!lastNameFocused && lastName === "" && styles.overlay}}>LAST NAME</Text>
                 <View style={styles.fieldInput}>
+                    <Ionicons name="person-circle" size={20}/>
                     <TextInput
                     autoCapitalize="words"
+                    onBlur={() => setLastNameFocused(false)} 
+                    onFocus={() => setLastNameFocused(true)} 
                     style={styles.fieldTextInput}
                     onChangeText={(text) => {dispatch(lastNameChange({value: text}))}}
                     value={lastName}/>
                 </View>
             </View>
             <View style={styles.field}>
-                <Text style={styles.fieldLabel}>EMAIL</Text>
+                <Text style={{...styles.fieldLabel, ...!emailFocused && email === "" && styles.overlay}}>EMAIL</Text>
                 <View style={styles.fieldInput}>
+                    <Ionicons name="mail-outline" size={20}/>
                     <TextInput
-                    autoCapitalize="none" 
+                    autoCapitalize="none"
+                    onBlur={() => setEmailFocused(false)} 
+                    onFocus={() => setEmailFocused(true)}  
                     style={styles.fieldTextInput}
                     onChangeText={(text) => {dispatch(emailChange({value: text}))}}
                     value={email}/>
@@ -49,7 +60,7 @@ const SignupPage1 = () => {
 const styles = StyleSheet.create({
     overlay: {
         position: "absolute",
-        left: 15,
+        left: "20%",
         top: 16,
         pointerEvents: "none"
     },
@@ -63,11 +74,7 @@ const styles = StyleSheet.create({
     },
     fieldLabel: {
         fontSize: 13,
-        fontWeight: "bold",
-        color: colors.SECONDARYACCENTTINT,
-        position: "absolute",
-        top: -20,
-        left: 20
+        color: "#777"
     },
     fieldInput: {
         flexDirection: "row",
