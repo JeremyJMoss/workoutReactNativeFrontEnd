@@ -7,14 +7,16 @@ import SignupAndLoginModal from './components/Modals/SignupAndLogin/SignupAndLog
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { colors } from './config/config';
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { useSelector } from 'react-redux';
 
 const Tab = createBottomTabNavigator();
-const isLoggedIn = true;
 
 const MainContent = function(){
+    const isLoggedIn = useSelector((state) => state.login.loginResponse.loggedIn)
+    
     return (
         <View style={styles.container}>
-          <SignupAndLoginModal isVisible={isLoggedIn}/>
+          <SignupAndLoginModal isVisible={!isLoggedIn}/>
           <Tab.Navigator
             sceneContainerStyle={{backgroundColor:colors.PRIMARYBACKGROUND}}
             screenOptions={({route}) => ({

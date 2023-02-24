@@ -1,90 +1,126 @@
-import {Text, View, Pressable, TextInput, StyleSheet} from "react-native";
+import {Text, View, Pressable, TextInput, StyleSheet, ActivityIndicator} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { colors } from "../../../../config/config";
 import PrimaryButton from "../../../UIElements/PrimaryButton";
-import { useState} from "react";
+import { useState, useEffect, useRef } from "react";
+import { usernameChange, passwordChange, attemptLogin, setErrorMessage, resetFetchStatus, resetErrorMessage } from "../../../../config/reducers/loginReducer";
+import { useSelector , useDispatch } from "react-redux";
 
 const Login = ({setPage}) => {
+    const dispatch = useDispatch();
+    const usernameRef = useRef();
+    const passwordRef = useRef();
     const [usernameFocused, setUsernameFocused] = useState(false);
     const [passwordFocused, setPasswordFocused] = useState(false);
-    const [usernameInput, setUsernameInput] = useState("");
-    const [passwordInput, setPasswordInput] = useState("");
-    const [loginResponse, setLoginResponse] = useState({});
+    const [passwordShown, setPasswordShown] = useState(false);
+    const {username, password} = useSelector((state) => state.login.loginDetails);
+    const [hasUsernameError, setHasUsernameError] = useState(false);
+    const [hasPasswordError, setHasPasswordError] = useState(false);
+    const loginResponse = useSelector((state) => state.login.loginResponse);
 
-    const setTextInput = (text, callbackFunc) => {
-            callbackFunc(text);
+    const changePassword = (text) => {
+        dispatch(passwordChange({value: text}));
+        if (password) return;
+        setHasPasswordError(false);
     }
 
-    const loginHandler = async() => {
-        try{
-            const response = await fetch(
-                "http://192.168.1.93:3000/authenticateLogin",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({username: usernameInput, password: passwordInput})
-                }
-            );
-            const data = await response.json();
-            setLoginResponse(data);
-            if(loginResponse.error){
-                setTimeout(() => setLoginResponse({}), 3000)
+    const changeUsername = (text) => {
+        dispatch(usernameChange({value: text}));
+        if (username) return;
+        setHasUsernameError(false);
+    }
+
+    const blurInputs = () => {
+        passwordRef.current.blur();
+        usernameRef.current.blur();
+        setPasswordFocused(false);
+        setUsernameFocused(false);
+    }
+
+    useEffect(() => {
+        if (!loginResponse.errorMessage) return;
+        
+        setTimeout(() => {
+            if (loginResponse.fetchStatus == "error"){
+                dispatch(resetFetchStatus());
             }
+            dispatch(resetErrorMessage());
+        }, 2500)
+    }, [loginResponse.errorMessage])
+
+    //TODO set up login logic using redux async thunk 
+
+    const loginHandler = () => {
+        if (!username){
+            dispatch(setErrorMessage({value:"All fields are required"}));
+            setHasUsernameError(true);
+        } 
+        if (!password){
+            dispatch(setErrorMessage({value:"All fields are required"}));
+            setHasPasswordError(true);
         }
-        catch(err){
-            setLoginResponse({loggedIn:false, error:err.message});
+        if (username && password){
+            dispatch(attemptLogin({username, password}));
+            blurInputs();
         }
     }
 
     return (
-        <View style={styles.window}>
-            <View style={styles.closeButton}>
-                <Pressable onPress={() => setPage("buttons")}>
-                    <Ionicons size={32} color={colors.PRIMARYWHITE} name="close-outline"/>
-                </Pressable>
-            </View>
-            {loginResponse.error && <View style={styles.banner}><Text style={styles.error}>{loginResponse.error}</Text></View>}
-            {loginResponse.loggedIn && <View style={styles.banner}><Text style={styles.success}>Logged In</Text></View>}
-            <View style={styles.container}>
-                <View style={styles.header}>
-                    <Text style={styles.heading}>Login</Text>
-                    <Text style={styles.subText}>Please sign in to continue.</Text>
+        <Pressable onPress={blurInputs} style={styles.window}>
+            <View style={styles.window}>
+                <View style={styles.closeButton}>
+                    <Pressable onPress={() => setPage("buttons")}>
+                        <Ionicons size={32} color={colors.PRIMARYWHITE} name="close-outline"/>
+                    </Pressable>
                 </View>
-                <View style={styles.inputs}>
-                    <View style={styles.field}>
-                        <Text style={{...styles.fieldLabel, ...!usernameFocused && usernameInput === "" && styles.overlay}}>USERNAME</Text>
-                        <View style={styles.fieldInput}>
-                            <Ionicons name="person-outline" size={20}/>
-                            <TextInput
-                            autoCapitalize="none"
-                            onBlur={() => {setUsernameFocused(false)}} 
-                            onFocus={() => setUsernameFocused(true)} 
-                            style={styles.fieldTextInput}
-                            onChangeText={(text) => {setTextInput(text, setUsernameInput)}}
-                            value={usernameInput}/>
+                {loginResponse.hasError && <View style={styles.banner}><Text style={styles.error}>{loginResponse.errorMessage}</Text></View>}
+                {loginResponse.loggedIn && <View style={styles.banner}><Text style={styles.success}>Logged In</Text></View>}
+                <View style={styles.container}>
+                    {loginResponse.fetchStatus == "loading" && <ActivityIndicator size="large" color={colors.SECONDARYACCENTTINT}/>}
+                    <View style={styles.header}>
+                        <Text style={styles.heading}>Login</Text>
+                        <Text style={styles.subText}>Please sign in to continue.</Text>
+                    </View>
+                    <View style={styles.inputs}>
+                        <View style={{...styles.field, ...hasUsernameError && styles.errorField}}>
+                            <Text style={{...styles.fieldLabel, ...!usernameFocused && username === "" && styles.overlay}}>USERNAME</Text>
+                            <View style={styles.fieldInput}>
+                                <Ionicons name="person-outline" size={20}/>
+                                <TextInput
+                                autoCapitalize="none"
+                                ref={usernameRef}
+                                onBlur={() => {setUsernameFocused(false)}} 
+                                onFocus={() => setUsernameFocused(true)} 
+                                style={styles.fieldTextInput}
+                                onChangeText={(text) => changeUsername(text)}
+                                value={username}/>
+                            </View>
+                        </View>
+                        <View style={{...styles.field, ...hasPasswordError && styles.errorField}}>
+                            <Text style={{...styles.fieldLabel, ...!passwordFocused && password === "" && styles.overlay}}>PASSWORD</Text>
+                            <View style={styles.fieldInput}>
+                                <Ionicons name="lock-closed-outline" size={20}/>
+                                <Pressable style={styles.eyeIcon} onPress={() => {setPasswordShown((state) => !state)}}>
+                                    {passwordShown ? <Ionicons name="eye-outline" size={25}/> : <Ionicons name="eye-off-outline"size={25}/>}
+                                </Pressable>
+                                <TextInput
+                                autoCapitalize="none"
+                                ref={passwordRef}
+                                onBlur={() => {setPasswordFocused(false)}} 
+                                onFocus={() => {setPasswordFocused(true)}} 
+                                style={styles.fieldTextInput}
+                                onChangeText={(text) => changePassword(text)}
+                                value={password}
+                                secureTextEntry={!passwordShown}/>
+                            </View>
                         </View>
                     </View>
-                    <View style={styles.field}>
-                        <Text style={{...styles.fieldLabel, ...!passwordFocused && passwordInput === "" && styles.overlay}}>PASSWORD</Text>
-                        <View style={styles.fieldInput}>
-                            <Ionicons name="lock-closed-outline" size={20}/>
-                            <TextInput
-                            autoCapitalize="none"
-                            onBlur={() => {setPasswordFocused(false)}} 
-                            onFocus={() => {setPasswordFocused(true)}} 
-                            style={styles.fieldTextInput}
-                            onChangeText={(text) => {setTextInput(text, setPasswordInput)}}
-                            value={passwordInput}/>
-                        </View>
+                    <View style={styles.buttonContainer}>
+                        <PrimaryButton styleOptions={styles.loginButton} onPress={loginHandler}>Login</PrimaryButton>
                     </View>
                 </View>
-                <View style={styles.buttonContainer}>
-                    <PrimaryButton styleOptions={styles.loginButton} onPress={loginHandler}>Login</PrimaryButton>
-                </View>
             </View>
-        </View>
+        </Pressable>
     )
 }
 
@@ -105,6 +141,7 @@ const styles = StyleSheet.create({
         position: "absolute",
         top: 12,
         width:"100%",
+        paddingVertical: 10,
         alignItems: "center",
         backgroundColor: "#111"
     },
@@ -151,6 +188,12 @@ const styles = StyleSheet.create({
         top: 16,
         pointerEvents: "none"
     },
+    eyeIcon: {
+        position: "absolute",
+        top: 0,
+        right: 0,
+        zIndex: 2
+    },
     field: {
         position: "relative",
         backgroundColor: colors.PRIMARYWHITE,
@@ -158,6 +201,10 @@ const styles = StyleSheet.create({
         marginVertical: 15,
         paddingHorizontal: 15,
         paddingVertical: 10
+    },
+    errorField: {
+        borderColor: "red",
+        borderWidth: 3,
     },
     fieldLabel: {
         fontSize: 13,
