@@ -1,10 +1,10 @@
 import { Text, View, StyleSheet } from "react-native";
-import { colors } from "../../../config/config";
+import { colors } from "../../config/config";
 
-const MealsScreen = function({props}){
+const AddMealItemScreen = (props) => {
     return (
         <View style={styles.container}>
-            <Text style={styles.text}>Hello Meals!</Text>
+            <Text style={styles.text}>Hello AddMealItem!</Text>
         </View>
     )
 }
@@ -21,4 +21,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default MealsScreen;
+export default AddMealItemScreen;

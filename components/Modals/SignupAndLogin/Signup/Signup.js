@@ -1,6 +1,6 @@
 import {View, StyleSheet, Text, ActivityIndicator} from "react-native";
 import { useEffect, useState } from "react";
-import CloseButton from "../../../UIElements/closeButton";
+import CloseButton from "../../../UIElements/CloseButton";
 import SignupPage1 from "./SignupPages/SignupPage1";
 import SignupPage2 from "./SignupPages/SignupPage2";
 import PrimaryButton from "../../../UIElements/PrimaryButton";

@@ -2,6 +2,7 @@ import {Text, View, Pressable, TextInput, StyleSheet, ActivityIndicator} from "r
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { colors } from "../../../../config/config";
 import PrimaryButton from "../../../UIElements/PrimaryButton";
+import CloseButton from "../../../UIElements/CloseButton";
 import { useState, useEffect, useRef } from "react";
 import { usernameChange, passwordChange, attemptLogin, setErrorMessage, resetFetchStatus, resetErrorMessage } from "../../../../config/reducers/loginReducer";
 import { useSelector , useDispatch } from "react-redux";
@@ -39,7 +40,7 @@ const Login = ({setPage}) => {
 
     useEffect(() => {
         if (!loginResponse.errorMessage) return;
-        
+
         setTimeout(() => {
             if (loginResponse.fetchStatus == "error"){
                 dispatch(resetFetchStatus());
@@ -51,16 +52,18 @@ const Login = ({setPage}) => {
     //TODO set up login logic using redux async thunk 
 
     const loginHandler = () => {
-        if (!username){
+        const strippedUsername = username.trim();
+        const strippedPassword = password.trim();
+        if (!strippedUsername){
             dispatch(setErrorMessage({value:"All fields are required"}));
             setHasUsernameError(true);
         } 
-        if (!password){
+        if (!strippedPassword){
             dispatch(setErrorMessage({value:"All fields are required"}));
             setHasPasswordError(true);
         }
-        if (username && password){
-            dispatch(attemptLogin({username, password}));
+        if (strippedUsername && strippedPassword){
+            dispatch(attemptLogin({username: strippedUsername, password: strippedPassword}));
             blurInputs();
         }
     }
@@ -68,11 +71,7 @@ const Login = ({setPage}) => {
     return (
         <Pressable onPress={blurInputs} style={styles.window}>
             <View style={styles.window}>
-                <View style={styles.closeButton}>
-                    <Pressable onPress={() => setPage("buttons")}>
-                        <Ionicons size={32} color={colors.PRIMARYWHITE} name="close-outline"/>
-                    </Pressable>
-                </View>
+                <CloseButton onPress={() => setPage("buttons")}/>
                 {loginResponse.hasError && <View style={styles.banner}><Text style={styles.error}>{loginResponse.errorMessage}</Text></View>}
                 {loginResponse.loggedIn && <View style={styles.banner}><Text style={styles.success}>Logged In</Text></View>}
                 <View style={styles.container}>

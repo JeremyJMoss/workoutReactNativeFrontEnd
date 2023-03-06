@@ -1,10 +1,10 @@
 import { Text, View, StyleSheet } from "react-native";
-import { colors } from "../../../config/config";
+import { colors } from "../../config/config";
 
-const HomeScreen = function({props}){
+const SettingsScreen = ({props}) => {
     return (
         <View style={styles.container}>
-            <Text style={styles.text}>Hello Home!</Text>
+            <Text style={styles.text}>Hello Settings!</Text>
         </View>
     )
 }
@@ -21,4 +21,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default HomeScreen;
+export default SettingsScreen;

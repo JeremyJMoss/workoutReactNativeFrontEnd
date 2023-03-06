@@ -1,3 +1,5 @@
+import {SECRET_KEY} from "@env";
+
 export const colors = {
     PRIMARYBAR: "#0D1523",
     PRIMARYBACKGROUND: "#173552",
@@ -7,3 +9,20 @@ export const colors = {
 };
 
 export const BASE_URL = "http://192.168.1.93:3000";
+
+export const MONTHS = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"
+];
+
+export const JWT_SECRET_KEY = SECRET_KEY;

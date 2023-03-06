@@ -1,5 +1,7 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { BASE_URL } from "../config";
+import { createSlice, createAsyncThunk, configureStore } from "@reduxjs/toolkit";
+import { BASE_URL, JWT_SECRET_KEY } from "../config";
+import jwt from "expo-jwt";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const initialState = {
     loginDetails: {
@@ -8,12 +10,19 @@ const initialState = {
     },
     loginResponse: {
         hasError: false,
-        loggedIn: false,
         errorMessage: "",
         token: "",
         fetchStatus: ""
     },
-    
+    userDetails: {
+        email: "",
+        firstName: "",
+        lastName: "",
+        userId: "",
+        username: "",
+        isAdmin: false
+    },
+    isReloadingApp: true
 }
 
 export const attemptLogin = createAsyncThunk(
@@ -39,6 +48,35 @@ export const attemptLogin = createAsyncThunk(
     }
 })
 
+export const attemptTokenAuthentication = createAsyncThunk(
+    "attemptTokenAuthentication", 
+    async (_, { rejectWithValue }) => {
+            try{
+                const token = await AsyncStorage.getItem("userToken");
+                if (!token){
+                    throw new Error("No token found in storage");
+                }
+                const response = await fetch(`${BASE_URL}/login/token`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type" : "application/json",
+                    },
+                    body: JSON.stringify({token})
+                });
+
+                if (!response.ok) { 
+                    const error = await response.json();
+                    throw new Error(error.message);
+                }
+
+                return response.json();
+            }
+            catch (error) {
+                return rejectWithValue(error.message);
+            }
+    }
+)
+
 const loginSlice = createSlice({
     name: "login",
     initialState,
@@ -60,12 +98,50 @@ const loginSlice = createSlice({
             state.loginResponse.errorMessage = "";
             state.loginResponse.hasError = false;
         },
+        logoutUser: (state) => {
+            state.userDetails = initialState.userDetails;
+            state.loginResponse.token = "";
+            AsyncStorage.removeItem("userToken");
+        }
     },
     extraReducers: (builder) => {
         builder
+        .addCase(attemptTokenAuthentication.fulfilled, (state, action) => {
+            state.loginResponse.fetchStatus = "success";
+            state.isReloadingApp = false;
+            state.loginResponse.token = action.payload.token;
+
+            const userInfo = jwt.decode(action.payload.token, JWT_SECRET_KEY)
+            
+            state.userDetails.email = userInfo.email;
+            state.userDetails.firstName = userInfo.firstname;
+            state.userDetails.lastName = userInfo.lastname;
+            state.userDetails.userId = userInfo.id;
+            state.userDetails.username = userInfo.username;
+            state.userDetails.isAdmin = userInfo.isAdmin ? true : false;
+            state.loginDetails = initialState.loginDetails;
+        })
+        .addCase(attemptTokenAuthentication.pending, (state) => {
+            state.loginResponse.fetchStatus = "loading";
+        })
+        .addCase(attemptTokenAuthentication.rejected, (state, action) => {
+            state.loginResponse.fetchStatus = "error";
+            state.isReloadingApp = false;
+        })
         .addCase(attemptLogin.fulfilled, (state, action) => {
             state.loginResponse.fetchStatus = "success";
-            state.loginResponse.loggedIn = true;
+            state.loginResponse.token = action.payload.token;
+            AsyncStorage.setItem("userToken", action.payload.token);
+
+            const userInfo = jwt.decode(action.payload.token, JWT_SECRET_KEY);
+
+            //Storing user info into state
+            state.userDetails.email = userInfo.email;
+            state.userDetails.firstName = userInfo.firstname;
+            state.userDetails.lastName = userInfo.lastname;
+            state.userDetails.userId = userInfo.id;
+            state.userDetails.username = userInfo.username;
+            state.userDetails.isAdmin = userInfo.isAdmin;
             state.loginDetails = initialState.loginDetails;
         })
         .addCase(attemptLogin.pending, (state) => {
@@ -73,7 +149,6 @@ const loginSlice = createSlice({
         })
         .addCase(attemptLogin.rejected, (state, action) => {
             state.loginResponse.fetchStatus = "error";
-            state.loginResponse.loggedIn = false;
             state.loginResponse.errorMessage = action.payload;
             state.loginResponse.hasError = true;
         })
@@ -86,4 +161,5 @@ export const setErrorMessage = loginSlice.actions.setErrorMessage;
 export const resetFields = loginSlice.actions.resetFields;
 export const resetFetchStatus = loginSlice.actions.resetFetchStatus;
 export const resetErrorMessage = loginSlice.actions.resetErrorMessage;
+export const logoutUser = loginSlice.actions.logoutUser;
 export default loginSlice.reducer;
