@@ -3,13 +3,16 @@ import { BASE_URL } from "../config";
 
 const initialState = {
     newMealData : {
-        energy: 0,
-        protein: 0,
-        totalFat: 0,
-        saturatedFat: 0,
-        carbohydrates: 0,
-        sugars: 0,
-        sodium: 0
+        name: "",
+        servingSize: "",
+        unitOfMeasurement: "g",
+        energy: "",
+        protein: "",
+        totalFat: "",
+        saturatedFat: "",
+        carbohydrates: "",
+        sugars: "",
+        sodium: ""
     },
     fetchStatus: "",
     errorMessage: "",
@@ -19,12 +22,13 @@ export const createMeal = createAsyncThunk(
     "createMeal", 
     async (postData, { rejectWithValue }) => {
     try{
-        const response = await fetch(`${BASE_URL}/meals/createmeal`, {
+        const response = await fetch(`${BASE_URL}/admin/meals/createmeal`, {
             method: "POST",
             headers: {
-                "Content-Type" : "application/json",
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${postData.token}`
             },
-            body: JSON.stringify(postData)
+            body: JSON.stringify({meal: postData.meal})
         });
 
         if (!response.ok) { 
@@ -42,6 +46,15 @@ const adminSlice = createSlice({
     name: "admin",
     initialState,
     reducers: {
+        nameChange: (state, action) => {
+            state.newMealData.name = action.payload.value;
+        },
+        servingSizeChange: (state, action) => {
+            state.newMealData.servingSize = action.payload.value;
+        },
+        unitOfMeasurementChange: (state, action) => {
+            state.newMealData.unitOfMeasurement = action.payload.value;
+        },
         energyChange: (state, action) => {
             state.newMealData.energy = action.payload.value;
         },
@@ -78,7 +91,7 @@ const adminSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-        .addCase(createMeal.fulfilled, (state, action) => {
+        .addCase(createMeal.fulfilled, (state) => {
             state.fetchStatus = "success";
         })
         .addCase(createMeal.pending, (state) => {
@@ -91,6 +104,9 @@ const adminSlice = createSlice({
     }
 });
 
+export const nameChange = adminSlice.actions.nameChange;
+export const servingSizeChange = adminSlice.actions.servingSizeChange;
+export const unitOfMeasurementChange = adminSlice.actions.unitOfMeasurementChange;
 export const energyChange = adminSlice.actions.energyChange;
 export const proteinChange = adminSlice.actions.proteinChange;
 export const totalFatChange = adminSlice.actions.totalFatChange;

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, configureStore } from "@reduxjs/toolkit";
 import { BASE_URL, JWT_SECRET_KEY } from "../config";
 import jwt from "expo-jwt";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 
 const initialState = {
     loginDetails: {
@@ -52,7 +52,7 @@ export const attemptTokenAuthentication = createAsyncThunk(
     "attemptTokenAuthentication", 
     async (_, { rejectWithValue }) => {
             try{
-                const token = await AsyncStorage.getItem("userToken");
+                const token = await SecureStore.getItemAsync("userToken");
                 if (!token){
                     throw new Error("No token found in storage");
                 }
@@ -101,7 +101,7 @@ const loginSlice = createSlice({
         logoutUser: (state) => {
             state.userDetails = initialState.userDetails;
             state.loginResponse.token = "";
-            AsyncStorage.removeItem("userToken");
+            SecureStore.deleteItemAsync("userToken");
         }
     },
     extraReducers: (builder) => {
@@ -131,7 +131,7 @@ const loginSlice = createSlice({
         .addCase(attemptLogin.fulfilled, (state, action) => {
             state.loginResponse.fetchStatus = "success";
             state.loginResponse.token = action.payload.token;
-            AsyncStorage.setItem("userToken", action.payload.token);
+            SecureStore.setItemAsync("userToken", action.payload.token);
 
             const userInfo = jwt.decode(action.payload.token, JWT_SECRET_KEY);
 
@@ -141,7 +141,7 @@ const loginSlice = createSlice({
             state.userDetails.lastName = userInfo.lastname;
             state.userDetails.userId = userInfo.id;
             state.userDetails.username = userInfo.username;
-            state.userDetails.isAdmin = userInfo.isAdmin;
+            state.userDetails.isAdmin = userInfo.isAdmin ? true : false;
             state.loginDetails = initialState.loginDetails;
         })
         .addCase(attemptLogin.pending, (state) => {
