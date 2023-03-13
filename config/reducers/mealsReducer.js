@@ -8,7 +8,6 @@ const initialState = {
         errorMessage: "",
         fetchStatus: ""
     },
-    
 }
 
 export const fetchMealTypes = createAsyncThunk(

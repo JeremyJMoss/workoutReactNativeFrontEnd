@@ -7,6 +7,7 @@ const initialState = {
         servingSize: "",
         unitOfMeasurement: "g",
         energy: "",
+        energyMeasurement: "cal",
         protein: "",
         totalFat: "",
         saturatedFat: "",
@@ -58,6 +59,9 @@ const adminSlice = createSlice({
         energyChange: (state, action) => {
             state.newMealData.energy = action.payload.value;
         },
+        energyMeasurementChange: (state, action) => {
+            state.newMealData.energyMeasurement = action.payload.value;
+        },
         proteinChange: (state, action) => {
             state.newMealData.protein = action.payload.value;
         },
@@ -108,6 +112,7 @@ export const nameChange = adminSlice.actions.nameChange;
 export const servingSizeChange = adminSlice.actions.servingSizeChange;
 export const unitOfMeasurementChange = adminSlice.actions.unitOfMeasurementChange;
 export const energyChange = adminSlice.actions.energyChange;
+export const energyMeasurementChange = adminSlice.actions.energyMeasurementChange;
 export const proteinChange = adminSlice.actions.proteinChange;
 export const totalFatChange = adminSlice.actions.totalFatChange;
 export const saturatedFatChange = adminSlice.actions.saturatedFatChange;
