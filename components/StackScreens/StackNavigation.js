@@ -3,11 +3,12 @@ import SettingsScreen from './SettingsScreen';
 import AddMealItemScreen from './AddMealItemScreen';
 import SideDrawer from '../DrawerScreens/SideDrawer';
 import CreateMealScreen from './CreateMealScreen';
+import ItemDetailsScreen from './ItemDetailsScreen';
 import { colors } from '../../config/config';
 
 const Stack = createStackNavigator();
 
-const StackNavigation = (props) => {
+const StackNavigation = () => {
     return (
         <Stack.Navigator 
         initialRouteName='Main'
@@ -33,7 +34,7 @@ const StackNavigation = (props) => {
             name="CreateMeal"
             component={CreateMealScreen}
             options={{
-                title: "Create New Meal"
+                title: "Create Meal",
             }}
             />
             <Stack.Screen 
@@ -43,7 +44,13 @@ const StackNavigation = (props) => {
             <Stack.Screen 
             name="AddMealItem" 
             component={AddMealItemScreen}
-            options={({ route }) => ({ title: route.params.title })}/>
+            options={({ route }) => ({ title: route.params.title })}
+            />
+            <Stack.Screen
+            name="ItemDetails"
+            component={ItemDetailsScreen}
+            options={() => ({ title: "Item Details", })}
+            />
         </Stack.Navigator>
     )
 }

@@ -27,7 +27,8 @@ const PrimaryButton = function({onPress, children, styleOptions = {}}){
                     {
                         fontSize: styleOptions.fontSize ?? 16,
                         fontWeight: "bold", 
-                        color: styleOptions.color ?? "black"
+                        color: styleOptions.color ?? "black",
+                        textAlign: "center"
                     }
                 }>
                 {children ?? "Button"}

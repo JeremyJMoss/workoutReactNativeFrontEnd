@@ -8,10 +8,9 @@ const MealSection = ({mealType, navigation}) => {
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.heading}>{mealType}</Text>
-                <AddMealButton onPress={() => navigation.navigate("AddMealItem", { title : mealType})}/>
+                <AddMealButton onPress={() => navigation.navigate("AddMealItem", { title : mealType })}/>
             </View>
-            <View>
-                
+            <View style={styles.mealsContainer}>
             </View>
         </View>
     )
@@ -19,7 +18,7 @@ const MealSection = ({mealType, navigation}) => {
 
 const styles = StyleSheet.create({
     container: {
-       flex: 1 
+       flex: 1,
     },
     header: {
         flex: 1,
@@ -31,6 +30,11 @@ const styles = StyleSheet.create({
     heading: {
         color: colors.PRIMARYWHITE,
         fontSize: 20
+    },
+    mealsContainer: {
+        marginVertical: 15,
+        borderTopWidth: 1,
+        borderTopColor: "#AAA"
     }
 })
 

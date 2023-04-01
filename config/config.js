@@ -25,4 +25,13 @@ export const MONTHS = [
     "Dec"
 ];
 
+
+export const mealTypes = [
+    "Breakfast", 
+    "Lunch", 
+    "Dinner", 
+    "Snacks", 
+    "Drinks"
+];
+
 export const JWT_SECRET_KEY = SECRET_KEY;

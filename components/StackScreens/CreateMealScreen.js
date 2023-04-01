@@ -1,18 +1,39 @@
-import { Text, View, StyleSheet, TextInput, ScrollView } from "react-native";
+import { Text, View, StyleSheet, TextInput, ScrollView} from "react-native";
 import { colors } from "../../config/config";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { energyMeasurementChange, nameChange, servingSizeChange, unitOfMeasurementChange, energyChange, proteinChange, totalFatChange, saturatedFatChange, carbohydratesChange, sugarsChange, sodiumChange, createMeal } from "../../config/reducers/adminReducer";
+import { energyMeasurementChange, nameChange, servingSizeChange, unitOfMeasurementChange, energyChange, proteinChange, totalFatChange, saturatedFatChange, carbohydratesChange, sugarsChange, sodiumChange, createMeal, resetFetchStatus, resetErrorMessage, resetFields } from "../../config/reducers/adminReducer";
 import RadioForm from "react-native-simple-radio-button";
-import PrimaryButton from "../UIElements/PrimaryButton"
+import CreateMealModal from "../Modals/CreateMealModal.js/CreateMealModal";
+import HeaderButton from "../UIElements/HeaderButton";
 
-const CreateMealScreen = () => {
+const CreateMealScreen = ({navigation}) => {
     const dispatch = useDispatch();
+    const fetchStatus = useSelector((state) => state.admin.fetchStatus);
+    const errorMessage = useSelector((state) => state.admin.errorMessage);
     const newMealData = useSelector((state) => state.admin.newMealData);
     const {token} = useSelector(state => state.login.loginResponse);
     const [hasNameError, setHasNameError] = useState(false);
     const [hasServingSizeError, setHasServingSizeError] = useState(false);
     const [hasEnergyError, setHasEnergyError] = useState(false);
+
+    useEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <HeaderButton 
+                title="Save"
+                onPress={sendMealData}/>
+            ),
+          });
+    }, [navigation]);
+
+    useEffect(() => {
+        if (fetchStatus !== "success") return;
+        dispatch(resetFetchStatus());
+        dispatch(resetErrorMessage());
+        dispatch(resetFields());
+        navigation.navigate("Main");
+    }, [fetchStatus])
 
     const changeField = (text, dispatchFunction, fieldState, stateSetter = null) => {
         dispatch(dispatchFunction({value: text}));
@@ -21,6 +42,11 @@ const CreateMealScreen = () => {
             stateSetter(false);
         }
         
+    }
+
+    const closeModal = () => {
+        dispatch(resetFetchStatus());
+        dispatch(resetErrorMessage());
     }
 
     const sendMealData = () => {
@@ -39,142 +65,148 @@ const CreateMealScreen = () => {
     } 
 
     return (
-        <ScrollView style={styles.inputs}>
-            <View style={styles.field}>
-                <Text style={styles.fieldLabel}>Name *</Text>
-                <View style={{...styles.nameFieldInput, ...hasNameError && styles.errorField}}>
-                    <TextInput
-                    autoCapitalize="words"
-                    style={styles.fieldTextInput}
-                    onChangeText={(text) => changeField(text, nameChange, newMealData.name, setHasNameError)}
-                    value={newMealData.name}/>
+        <View style={styles.container}>
+            <CreateMealModal
+            isVisible={fetchStatus === "error" || fetchStatus === "loading"}
+            status={fetchStatus}
+            onClose={closeModal}
+            errorMessage={errorMessage}/>
+            <ScrollView style={styles.inputs}>
+                <View style={styles.field}>
+                    <Text style={styles.fieldLabel}>Name *</Text>
+                    <View style={{...styles.nameFieldInput, ...hasNameError && styles.errorField}}>
+                        <TextInput
+                        autoCapitalize="words"
+                        style={styles.fieldTextInput}
+                        onChangeText={(text) => changeField(text, nameChange, newMealData.name, setHasNameError)}
+                        value={newMealData.name}/>
+                    </View>
                 </View>
-            </View>
-            <View style={styles.field}>
-                <Text style={styles.fieldLabel}>{`Serving Size (${newMealData.unitOfMeasurement}) *`}</Text>
-                <View style={{...styles.fieldInput, ...hasServingSizeError && styles.errorField}}>
-                    <TextInput
-                    keyboardType="number-pad"
-                    style={styles.fieldTextInput}
-                    onChangeText={(text) => changeField(text, servingSizeChange, newMealData.servingSize, setHasServingSizeError)}
-                    value={newMealData.servingSize}/>
+                <View style={styles.field}>
+                    <Text style={styles.fieldLabel}>{`Serving Size (${newMealData.unitOfMeasurement}) *`}</Text>
+                    <View style={{...styles.fieldInput, ...hasServingSizeError && styles.errorField}}>
+                        <TextInput
+                        keyboardType="number-pad"
+                        style={styles.fieldTextInput}
+                        onChangeText={(text) => changeField(text, servingSizeChange, newMealData.servingSize, setHasServingSizeError)}
+                        value={newMealData.servingSize}/>
+                    </View>
                 </View>
-            </View>
-            <RadioForm
-                radio_props={[{label: "g", value: "g"}, {label: "mL", value: "mL"}]}
-                initial={0}
-                formHorizontal={true}
-                labelHorizontal={true}
-                buttonColor={colors.PRIMARYWHITE}
-                selectedButtonColor={colors.SECONDARYACCENTTINT}
-                animation={true}
-                labelStyle={
-                    {
-                        color: colors.SECONDARYACCENTTINT, 
-                        marginRight: 15, 
-                        fontSize: 16
+                <RadioForm
+                    radio_props={[{label: "g", value: "g"}, {label: "mL", value: "mL"}]}
+                    initial={0}
+                    formHorizontal={true}
+                    labelHorizontal={true}
+                    buttonColor={colors.PRIMARYWHITE}
+                    selectedButtonColor={colors.SECONDARYACCENTTINT}
+                    animation={true}
+                    labelStyle={
+                        {
+                            color: colors.SECONDARYACCENTTINT, 
+                            marginRight: 15, 
+                            fontSize: 16
+                        }
                     }
-                }
-                onPress={(value) => dispatch(unitOfMeasurementChange({value}))}
-            />
-            <View style={styles.field}>
-                <Text style={styles.fieldLabel}>{`Energy (${newMealData.energyMeasurement}) *`}</Text>
-                <View style={{...styles.fieldInput, ...hasEnergyError && styles.errorField}}>
-                    <TextInput
-                    keyboardType="number-pad"
-                    style={styles.fieldTextInput}
-                    onChangeText={(text) => changeField(text, energyChange, newMealData.energy, setHasEnergyError)}
-                    value={newMealData.energy}/>
+                    onPress={(value) => dispatch(unitOfMeasurementChange({value}))}
+                />
+                <View style={styles.field}>
+                    <Text style={styles.fieldLabel}>{`Energy (${newMealData.energyMeasurement}) *`}</Text>
+                    <View style={{...styles.fieldInput, ...hasEnergyError && styles.errorField}}>
+                        <TextInput
+                        keyboardType="number-pad"
+                        style={styles.fieldTextInput}
+                        onChangeText={(text) => changeField(text, energyChange, newMealData.energy, setHasEnergyError)}
+                        value={newMealData.energy}/>
+                    </View>
                 </View>
-            </View>
-            <RadioForm
-                radio_props={[{label: "cal", value: "cal"}, {label: "kj", value: "kj"}]}
-                initial={0}
-                formHorizontal={true}
-                labelHorizontal={true}
-                buttonColor={colors.PRIMARYWHITE}
-                selectedButtonColor={colors.SECONDARYACCENTTINT}
-                animation={true}
-                labelStyle={
-                    {
-                        color: colors.SECONDARYACCENTTINT, 
-                        marginRight: 15, 
-                        fontSize: 16
+                <RadioForm
+                    radio_props={[{label: "cal", value: "cal"}, {label: "kj", value: "kj"}]}
+                    initial={0}
+                    formHorizontal={true}
+                    labelHorizontal={true}
+                    buttonColor={colors.PRIMARYWHITE}
+                    selectedButtonColor={colors.SECONDARYACCENTTINT}
+                    animation={true}
+                    labelStyle={
+                        {
+                            color: colors.SECONDARYACCENTTINT, 
+                            marginRight: 15, 
+                            fontSize: 16
+                        }
                     }
-                }
-                onPress={(value) => dispatch(energyMeasurementChange({value}))}
-            />
-            <View style={styles.field}>
-                <Text style={styles.fieldLabel}>Protein (g)</Text>
-                <View style={styles.fieldInput}>
-                    <TextInput
-                    keyboardType="number-pad"
-                    style={styles.fieldTextInput}
-                    onChangeText={(text) => changeField(text, proteinChange, newMealData.protein)}
-                    value={newMealData.protein}/>
+                    onPress={(value) => dispatch(energyMeasurementChange({value}))}
+                />
+                <View style={styles.field}>
+                    <Text style={styles.fieldLabel}>Protein (g)</Text>
+                    <View style={styles.fieldInput}>
+                        <TextInput
+                        keyboardType="number-pad"
+                        style={styles.fieldTextInput}
+                        onChangeText={(text) => changeField(text, proteinChange, newMealData.protein)}
+                        value={newMealData.protein}/>
+                    </View>
                 </View>
-            </View>
-            <View style={styles.field}>
-                <Text style={styles.fieldLabel}>Total Fat (g)</Text>
-                <View style={styles.fieldInput}>
-                    <TextInput
-                    keyboardType="number-pad"
-                    style={styles.fieldTextInput}
-                    onChangeText={(text) => changeField(text, totalFatChange, newMealData.totalFat)}
-                    value={newMealData.totalFat}/>
+                <View style={styles.field}>
+                    <Text style={styles.fieldLabel}>Total Fat (g)</Text>
+                    <View style={styles.fieldInput}>
+                        <TextInput
+                        keyboardType="number-pad"
+                        style={styles.fieldTextInput}
+                        onChangeText={(text) => changeField(text, totalFatChange, newMealData.totalFat)}
+                        value={newMealData.totalFat}/>
+                    </View>
                 </View>
-            </View>
-            <View style={styles.field}>
-                <Text style={styles.fieldLabel}>Saturated Fat (g)</Text>
-                <View style={styles.fieldInput}>
-                    <TextInput
-                    keyboardType="number-pad"
-                    style={styles.fieldTextInput}
-                    onChangeText={(text) => changeField(text, saturatedFatChange, newMealData.saturatedFat)}
-                    value={newMealData.saturatedFat}/>
+                <View style={styles.field}>
+                    <Text style={styles.fieldLabel}>Saturated Fat (g)</Text>
+                    <View style={styles.fieldInput}>
+                        <TextInput
+                        keyboardType="number-pad"
+                        style={styles.fieldTextInput}
+                        onChangeText={(text) => changeField(text, saturatedFatChange, newMealData.saturatedFat)}
+                        value={newMealData.saturatedFat}/>
+                    </View>
                 </View>
-            </View>
-            <View style={styles.field}>
-                <Text style={styles.fieldLabel}>Carbohydrates (g)</Text>
-                <View style={styles.fieldInput}>
-                    <TextInput
-                    keyboardType="number-pad"
-                    style={styles.fieldTextInput}
-                    onChangeText={(text) => changeField(text, carbohydratesChange, newMealData.carbohydrates)}
-                    value={newMealData.carbohydrates}/>
+                <View style={styles.field}>
+                    <Text style={styles.fieldLabel}>Carbohydrates (g)</Text>
+                    <View style={styles.fieldInput}>
+                        <TextInput
+                        keyboardType="number-pad"
+                        style={styles.fieldTextInput}
+                        onChangeText={(text) => changeField(text, carbohydratesChange, newMealData.carbohydrates)}
+                        value={newMealData.carbohydrates}/>
+                    </View>
                 </View>
-            </View>
-            <View style={styles.field}>
-                <Text style={styles.fieldLabel}>Sugars (g)</Text>
-                <View style={styles.fieldInput}>
-                    <TextInput
-                    keyboardType="number-pad"
-                    style={styles.fieldTextInput}
-                    onChangeText={(text) => changeField(text, sugarsChange, newMealData.sugars)}
-                    value={newMealData.sugars}/>
+                <View style={styles.field}>
+                    <Text style={styles.fieldLabel}>Sugars (g)</Text>
+                    <View style={styles.fieldInput}>
+                        <TextInput
+                        keyboardType="number-pad"
+                        style={styles.fieldTextInput}
+                        onChangeText={(text) => changeField(text, sugarsChange, newMealData.sugars)}
+                        value={newMealData.sugars}/>
+                    </View>
                 </View>
-            </View>
-            <View style={styles.field}>
-                <Text style={styles.fieldLabel}>Sodium (mg)</Text>
-                <View style={styles.fieldInput}>
-                    <TextInput
-                    keyboardType="number-pad"
-                    style={styles.fieldTextInput}
-                    onChangeText={(text) => changeField(text, sodiumChange, newMealData.sodium)}
-                    value={newMealData.sodium}/>
+                <View style={styles.field}>
+                    <Text style={styles.fieldLabel}>Sodium (mg)</Text>
+                    <View style={styles.fieldInput}>
+                        <TextInput
+                        keyboardType="number-pad"
+                        style={styles.fieldTextInput}
+                        onChangeText={(text) => changeField(text, sodiumChange, newMealData.sodium)}
+                        value={newMealData.sodium}/>
+                    </View>
                 </View>
-            </View>
-            <View style={styles.buttonContainer}>
-                <PrimaryButton
-                onPress={sendMealData}
-                styleOptions={styles.buttonStyle}
-                >Submit</PrimaryButton>
-            </View>
-        </ScrollView>
+            </ScrollView>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
+    container: {
+        width: "100%",
+        height: "100%",
+        justifyContent: "center",
+    },
     field: {
         flex: 1,
         flexDirection: "row",
@@ -213,24 +245,13 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
     inputs: {
-        marginHorizontal: 30
+        marginHorizontal: 30,
     },
     servingMetric: {
         top: 5,
         right: 8,
         fontSize: 18
     },
-    buttonStyle: {
-        backgroundColor: colors.SECONDARYACCENTTINT,
-        color: colors.ACCENTTINT,
-        fontSize: 18,
-        width: 180,
-        borderWidth: 3,
-    },
-    buttonContainer: {
-        alignItems: "center",
-        margin: 20
-    }
 })
 
 export default CreateMealScreen;

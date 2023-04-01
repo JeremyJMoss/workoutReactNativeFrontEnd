@@ -35,3 +35,8 @@ export const isTomorrow = (date) => {
          date.getMonth() === tomorrow.getMonth() &&
          date.getFullYear() === tomorrow.getFullYear();
 }
+
+export const toFixedNoRound = (number, precision = 1) => {
+  const factor = Math.pow(10, precision);
+  return Math.floor(number * factor) / factor;
+}

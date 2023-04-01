@@ -1,6 +1,5 @@
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Pressable, View, StyleSheet } from "react-native";
-import { colors } from "../../config/config";
 
 const ToggleButton = ({iconName, iconSize, iconColor, onPress}) => {
     return (
