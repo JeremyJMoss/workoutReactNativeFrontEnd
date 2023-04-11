@@ -1,9 +1,8 @@
-import { Text, View, StyleSheet, ActivityIndicator } from "react-native";
+import { Text, View, StyleSheet, ActivityIndicator, TextInput } from "react-native";
 import { colors, BASE_URL } from "../../config/config";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import DropDownPicker from "../UIElements/DropDownPicker";
-import { TextInput } from "react-native-gesture-handler";
 import { toFixedNoRound } from "../../config/helper/helper";
 import HeaderButton from "../UIElements/HeaderButton";
 
@@ -13,24 +12,25 @@ const ItemDetailsScreen = ({route, navigation}) => {
     const [mealData, setMealData] = useState({});
     const {token} = useSelector(state => state.login.loginResponse);
     const [selectedServingSize, setSelectedServingSize] = useState(null);
-    const [quantity, setQuantity] = useState(null);
+    const [quantity, setQuantity] = useState("");
     const {date} = useSelector(state => state.date);
 
     const {id, name} = route.params.meal;
     const {mealType} = route.params;
-    
+
     useEffect(() => {
     navigation.setOptions({
         headerRight: () => (
             <HeaderButton 
-            title="Save"/>
+            title="Save"
+            onPress={sendMealEntry}/>
         ),
       });
-    }, [navigation]);
+    }, [navigation, quantity]);
 
     useEffect(() => {
         if(Object.keys(mealData).length < 1) return;
-        setSelectedServingSize(`${mealData.servings.find(serving => serving.name == "Serving")?.servingSize}${mealData.unitOfMeasurement}`);
+        setSelectedServingSize({name: "Serving", option:`${mealData.servings.find(serving => serving.name == "Serving")?.servingSize}${mealData.unitOfMeasurement}`});
     }, [mealData])
 
     useEffect(() => {
@@ -58,13 +58,48 @@ const ItemDetailsScreen = ({route, navigation}) => {
             setMealData(data.meal);
         })
         .catch(error => {
-            console.log(error.message);
             setFetchStatus("error");
             setErrorMessage(error.message);
         })
     }, [id, token])
 
-    const servingSize = parseInt(selectedServingSize) * parseFloat(quantity);
+    const sendMealEntry = function() {
+        if (!quantity) return;
+        setFetchStatus("loading");
+        fetch(`${BASE_URL}/meals/createmealentry`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                dateEaten: date,
+                mealType,
+                foodId: id,
+                servingName: selectedServingSize.name,
+                quantity
+            })
+        })
+        .then(response => {
+            if (response.status === 404){
+                throw new Error("Network Error");
+            }
+            if (!response.ok){
+                throw new Error(response.json());    
+            }
+
+            return response.json();
+        })
+        .then(data => {
+            setFetchStatus("success");
+        })
+        .catch(error => {
+            setFetchStatus("error");
+            setErrorMessage(error.message);
+        })
+    }
+
+    const servingSize = parseInt(selectedServingSize?.option) * parseFloat(quantity);
 
     return (
         <View style={styles.container}>
@@ -79,9 +114,8 @@ const ItemDetailsScreen = ({route, navigation}) => {
                             <Text style={styles.fieldText}>Quantity:</Text>
                             <TextInput
                             style={styles.quantityField}
-                            placeholder=""
                             keyboardType="number-pad"
-                            onChangeText={(value) => setQuantity(value)}
+                            onChangeText={text => setQuantity(text)}
                             value={quantity}
                             />
                         </View>
@@ -90,7 +124,7 @@ const ItemDetailsScreen = ({route, navigation}) => {
                             {mealData && selectedServingSize &&
                             <DropDownPicker
                             setSelectedValue={setSelectedServingSize}
-                            selectedValue={selectedServingSize}
+                            selectedValue={selectedServingSize.option}
                             optionKeys={mealData.servings?.map(serving => serving.name)}
                             options={mealData.servings?.map(serving => `${serving.servingSize !== "Single" ? serving.servingSize : ""}${mealData.unitOfMeasurement}`)}
                             />}
