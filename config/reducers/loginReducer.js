@@ -60,8 +60,8 @@ export const attemptTokenAuthentication = createAsyncThunk(
                     method: "POST",
                     headers: {
                         "Content-Type" : "application/json",
-                    },
-                    body: JSON.stringify({token})
+                        "Authorization": `Bearer ${token}`
+                    }
                 });
 
                 if (!response.ok) { 

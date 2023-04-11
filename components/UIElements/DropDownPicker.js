@@ -24,7 +24,7 @@ const DropDownPicker =  ({options, optionKeys, selectedValue, setSelectedValue})
                     <View key={optionKeys[index]}>
                         <Pressable style={styles.dropDownOptionField} onPress={() => {
                             setDropDownOpen(false);
-                            setSelectedValue(option);
+                            setSelectedValue({name: optionKeys[index], option});
                         }}>
                             <Text style={styles.dropDownFieldText}>{option}</Text>
                         </Pressable>
