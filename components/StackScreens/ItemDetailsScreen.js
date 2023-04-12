@@ -26,7 +26,7 @@ const ItemDetailsScreen = ({route, navigation}) => {
             onPress={sendMealEntry}/>
         ),
       });
-    }, [navigation, quantity]);
+    }, [navigation, sendMealEntry]);
 
     useEffect(() => {
         if(Object.keys(mealData).length < 1) return;
@@ -120,13 +120,17 @@ const ItemDetailsScreen = ({route, navigation}) => {
                             />
                         </View>
                         <View style={styles.rowContainer}>
-                            <Text style={styles.fieldText}>Serving Sizes:</Text>
                             {mealData && selectedServingSize &&
                             <DropDownPicker
                             setSelectedValue={setSelectedServingSize}
                             selectedValue={selectedServingSize.option}
                             optionKeys={mealData.servings?.map(serving => serving.name)}
-                            options={mealData.servings?.map(serving => `${serving.servingSize !== "Single" ? serving.servingSize : ""}${mealData.unitOfMeasurement}`)}
+                            options={mealData.servings?.map(serving => {
+                                if (serving.name === "Single"){
+                                    return `${serving.servingSize}${mealData.unitOfMeasurement}`;
+                                }
+                                return `${serving.name} (${serving.servingSize}${mealData.unitOfMeasurement})`;
+                            })}
                             />}
                         </View>
                         {mealData && selectedServingSize && quantity &&

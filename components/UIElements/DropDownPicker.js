@@ -15,7 +15,9 @@ const DropDownPicker =  ({options, optionKeys, selectedValue, setSelectedValue})
             <View>
                 <Pressable style={styles.dropDownButton} onPress={() => {setDropDownOpen(state => !state)}}>
                     <Text style={styles.dropDownButtonText}>{selectedValue}</Text>
-                    <Ionicons size={20} color="#111" name={dropDownIcon}/>
+                    <View style={styles.dropDownIcon}>
+                        <Ionicons size={20} color="#111" name={dropDownIcon}/>
+                    </View>
                 </Pressable>
             </View>
             <View style={styles.dropDownFieldContainer}>
@@ -31,7 +33,6 @@ const DropDownPicker =  ({options, optionKeys, selectedValue, setSelectedValue})
                     </View>
                     )
                 })}
-                
             </View>
         </View>
     )
@@ -40,7 +41,6 @@ const DropDownPicker =  ({options, optionKeys, selectedValue, setSelectedValue})
 const styles = StyleSheet.create({
     dropDownContainer: {
         position: "relative",
-        width: 150,
         zIndex: 10
     },
     dropDownButton: {
@@ -52,10 +52,16 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         backgroundColor: colors.PRIMARYWHITE
     },
+    dropDownIcon: {
+        position: "absolute",
+        right: 10
+    },
     dropDownButtonText: {
         color: "#111",
         marginHorizontal: 10,
-        fontSize: 18
+        fontSize: 18,
+        flex: 1,
+        textAlign: "center"
     },
     dropDownOptionField: {
         padding: 10,

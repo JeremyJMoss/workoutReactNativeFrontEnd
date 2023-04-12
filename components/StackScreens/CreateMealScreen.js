@@ -1,6 +1,6 @@
 import { Text, View, StyleSheet, TextInput, ScrollView} from "react-native";
 import { colors } from "../../config/config";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { energyMeasurementChange, nameChange, servingSizeChange, unitOfMeasurementChange, energyChange, proteinChange, totalFatChange, saturatedFatChange, carbohydratesChange, sugarsChange, sodiumChange, createMeal, resetFetchStatus, resetErrorMessage, resetFields } from "../../config/reducers/adminReducer";
 import RadioForm from "react-native-simple-radio-button";
@@ -25,7 +25,7 @@ const CreateMealScreen = ({navigation}) => {
                 onPress={sendMealData}/>
             ),
           });
-    }, [navigation]);
+    }, [navigation, sendMealData, newMealData]);
 
     useEffect(() => {
         if (fetchStatus !== "success") return;
@@ -41,7 +41,6 @@ const CreateMealScreen = ({navigation}) => {
         if (stateSetter){
             stateSetter(false);
         }
-        
     }
 
     const closeModal = () => {
@@ -62,7 +61,7 @@ const CreateMealScreen = ({navigation}) => {
         if (strippedValues.name && strippedValues.servingSize && strippedValues.energy){
             dispatch(createMeal({token, meal: strippedValues}));
         }
-    } 
+    }; 
 
     return (
         <View style={styles.container}>
